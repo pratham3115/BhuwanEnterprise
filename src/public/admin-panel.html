@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product</title>
+</head>
+<body>
+  <h1>Add a New Product</h1>
+
+  <!-- Form to Add Product -->
+  <form id="product-form">
+    <label for="name">Product Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <label for="price">Price:</label><br>
+    <input type="number" id="price" name="price" required><br><br>
+
+    <label for="description">Description:</label><br>
+    <textarea id="description" name="description" required></textarea><br><br>
+
+    <label for="image">Image URL:</label><br>
+    <input type="text" id="image" name="image"><br><br>
+
+    <label for="imageFile">Or Upload Image:</label><br>
+    <input type="file" id="imageFile" name="imageFile" accept="image/*"><br><br>
+
+    <label for="inStock">In Stock:</label><br>
+    <input type="checkbox" id="inStock" name="inStock"><br><br>
+
+    <button type="submit">Add Product</button>
+  </form>
+
+  <h2>Product List</h2>
+  <ul id="product-list"></ul>
+
+  <script>
+    // Fetch all products from the server when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchProducts();
+    });
+
+    // Function to fetch products from the server and display them
+    function fetchProducts() {
+      fetch('http://localhost:5000/api/products')
+        .then(response => response.json())
+        .then(products => {
+          const productList = document.getElementById('product-list');
+          productList.innerHTML = ''; // Clear the list before appending new data
+
+          // Loop through the products and add them to the list
+          products.forEach(product => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              ${product.name} - $${product.price}
+              <img src="${product.image}" alt="${product.name}" style="max-width: 100px; max-height: 100px;">
+            `;
+            productList.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Error fetching products:', error));
+    }
+
+    // Handle the form submission to add a product
+    document.getElementById('product-form').addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      const formData = new FormData();
+      formData.append('name', document.getElementById('name').value);
+      formData.append('price', document.getElementById('price').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('inStock', document.getElementById('inStock').checked);
+
+      const imageUrl = document.getElementById('image').value;
+      const imageFile = document.getElementById('imageFile').files[0];
+
+      if (imageFile) {
+        formData.append('image', imageFile);
+      } else if (imageUrl) {
+        formData.append('imageUrl', imageUrl);
+      }
+
+      // Send a POST request to the backend to add a product
+      fetch('http://localhost:5000/api/products', {
+        method: 'POST',
+        body: formData // Send formData instead of JSON
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => {
+            throw new Error(text);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        // After adding the product, fetch the updated product list
+        fetchProducts();
+        alert('Product added successfully!');
+        // Clear the form
+        document.getElementById('product-form').reset();
+      })
+      .catch(error => {
+        alert('Error adding product: ' + error.message);
+        console.error(error);
+      });
+    });
+  </script>
+
+</body>
+</html>
+
