@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../api";
 
 function Login() {
   const [identifier, setIdentifier] = useState(""); // Can be email or mobile
@@ -13,10 +14,19 @@ function Login() {
     e.preventDefault();
     setError(null);
     try {
-      await login(identifier, password); // Send either email or mobile number
-      navigate("/"); // Redirect to home after login
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ identifier, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Login failed");
+      await login(identifier, password);
+      navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.message);
     }
   };
 

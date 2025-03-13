@@ -5,6 +5,7 @@ import ProductModal from "./ProductModal";
 import SearchBar from "./SearchBar"; // Import the SearchBar component
 import "../styles/product-page.css";
 import { Link, useNavigate } from 'react-router-dom';
+import API_BASE_URL from "../config";
 
 export default function ProductPage({ cart, setCart }) {
   const [categories, setCategories] = useState([]);
@@ -21,7 +22,7 @@ export default function ProductPage({ cart, setCart }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/categories")
+    fetch(`${API_BASE_URL}/categories`)
       .then((res) => res.json())
       .then((data) => {
         const categoriesWithImages = data.map((category) => ({
@@ -35,7 +36,7 @@ export default function ProductPage({ cart, setCart }) {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
+    fetch(`${API_BASE_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
         setAllProducts(data);
@@ -46,7 +47,7 @@ export default function ProductPage({ cart, setCart }) {
 
   useEffect(() => {
     if (selectedCategory) {
-      fetch(`http://localhost:5000/api/products?category=${selectedCategory._id}`)
+      fetch(`${API_BASE_URL}/products?category=${selectedCategory._id}`)
         .then((res) => res.json())
         .then((data) => {
           setProducts(data);
