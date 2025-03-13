@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./CheckoutPage.css"; // Import the CSS file
+import "./CheckoutPage.css";
 import PropTypes from "prop-types";
 import { Plus, Minus, Trash } from "lucide-react";
 
@@ -24,14 +24,30 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
     }));
   };
 
+  const isFormIncomplete = Object.values(userInfo).some((value) => value.trim() === "");
+
+  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (cart.size === 0 || Array.from(cart.values()).length === 0) {
+      alert("Your cart is empty. Please add items before placing an order.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (isFormIncomplete) {
+      alert("Please fill in all required fields.");
+      setIsLoading(false);
+      return;
+    }
+
     const orderData = {
-      ...userInfo,
-      cart: Array.from(cart.values()),
-      total: calculateTotal(),
+      customer: userInfo,
+      items: Array.from(cart.values()),
+      totalAmount: calculateTotal(),
     };
 
     try {
@@ -42,7 +58,9 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/orders", {
+      console.log("Sending request to:", `${BASE_URL}/api/orders`);
+
+      const response = await fetch(`${BASE_URL}/api/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,12 +69,18 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
         body: JSON.stringify(orderData),
       });
 
-      if (response.ok) {
-        console.log("Order placed successfully!");
-        alert("Order placed successfully!");
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const responseData = await response.json();
+        if (response.ok) {
+          console.log("Order placed successfully!", responseData);
+          alert("Order placed successfully!");
+        } else {
+          console.error("Failed to place order:", responseData.message);
+          alert(`Failed to place order: ${responseData.message}`);
+        }
       } else {
-        const errorText = await response.text();
-        console.error("Error placing order:", errorText);
+        console.error("Unexpected response format:", response);
         alert("Failed to place order. Please try again.");
       }
     } catch (error) {
@@ -73,7 +97,7 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
       <div className="checkout-container">
         <div className="order-summary">
           <h3>Order Summary</h3>
-          {Array.from(cart.values()).length > 0 ? (
+          {cart.size > 0 ? (
             Array.from(cart.values()).map((item) => (
               <div key={item._id} className="cart-item">
                 <img src={item.image || "/placeholder.png"} alt={item.name} className="cart-item-image" />
@@ -105,63 +129,18 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
         </div>
         <form className="checkout-form" onSubmit={handleSubmit}>
           <h3>User Information</h3>
-          <input
-            type="text"
-            name="name"
-            value={userInfo.name}
-            onChange={handleInputChange}
-            placeholder="Full Name"
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            value={userInfo.email}
-            onChange={handleInputChange}
-            placeholder="Email"
-            required
-          />
-          <input
-            type="text"
-            name="mobile"
-            value={userInfo.mobile}
-            onChange={handleInputChange}
-            placeholder="Mobile No"
-            required
-          />
-          <input
-            type="text"
-            name="country"
-            value={userInfo.country}
-            onChange={handleInputChange}
-            placeholder="Country"
-            required
-          />
-          <input
-            type="text"
-            name="state"
-            value={userInfo.state}
-            onChange={handleInputChange}
-            placeholder="State"
-            required
-          />
-          <input
-            type="text"
-            name="city"
-            value={userInfo.city}
-            onChange={handleInputChange}
-            placeholder="City"
-            required
-          />
-          <input
-            type="text"
-            name="zip"
-            value={userInfo.zip}
-            onChange={handleInputChange}
-            placeholder="ZIP Code"
-            required
-          />
-          <button type="submit" className="checkout-button" disabled={isLoading}>
+          {["name", "email", "mobile", "country", "state", "city", "zip"].map((field) => (
+            <input
+              key={field}
+              type={field === "email" ? "email" : "text"}
+              name={field}
+              value={userInfo[field]}
+              onChange={handleInputChange}
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              required
+            />
+          ))}
+          <button type="submit" className="checkout-button" disabled={isLoading || isFormIncomplete}>
             {isLoading ? "Placing Order..." : "Place Order"}
           </button>
         </form>

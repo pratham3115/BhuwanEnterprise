@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function Orders() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState([]); // Ensuring it's initialized as an array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -17,14 +17,14 @@ function Orders() {
           return;
         }
 
-        // ✅ Fetch user details from the new correct route
+        // Fetch user details to check admin role
         const userResponse = await axios.get("http://localhost:5000/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         setIsAdmin(userResponse.data.isAdmin);
 
-        // ✅ Use the correct API endpoint based on role
+        // Use the correct API endpoint based on role
         const url = userResponse.data.isAdmin
           ? "http://localhost:5000/api/orders/all" // Admins see all orders
           : "http://localhost:5000/api/orders/myorders"; // Customers see only their orders
@@ -33,7 +33,8 @@ function Orders() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setOrders(response.data);
+        console.log("API Response:", response.data); // Debugging
+        setOrders(response.data.orders || []); // Ensure orders is always an array
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch orders");
       } finally {
@@ -50,9 +51,8 @@ function Orders() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">{isAdmin ? "All Orders" : "My Orders"}</h1>
-      {orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
+
+      {Array.isArray(orders) && orders.length > 0 ? ( // Ensure orders is an array before mapping
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
@@ -70,19 +70,25 @@ function Orders() {
                 {isAdmin && <td className="p-2">{order.customer?.name || "N/A"}</td>}
                 <td className="p-2">
                   <ul className="list-disc pl-4">
-                    {order.items.map((item) => (
-                      <li key={item.productId}>
-                        {item.productName} (x{item.quantity})
-                      </li>
-                    ))}
+                    {Array.isArray(order.items) && order.items.length > 0 ? (
+                      order.items.map((item) => (
+                        <li key={item.productId}>
+                          {item.productName} (x{item.quantity})
+                        </li>
+                      ))
+                    ) : (
+                      <li>No items</li>
+                    )}
                   </ul>
                 </td>
-                <td className="p-2">${order.totalAmount.toFixed(2)}</td>
+                <td className="p-2">₹{order.totalAmount.toFixed(2)}</td>
                 <td className="p-2">{order.status || "Pending"}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      ) : (
+        <p>No orders found.</p>
       )}
     </div>
   );

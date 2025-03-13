@@ -9,7 +9,7 @@ const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/authRoutes");
-const userRoutes = require("./routes/userRoutes"); // ✅ Fix: Import user routes
+const userRoutes = require("./routes/userRoutes");
 
 dotenv.config();
 
@@ -29,40 +29,36 @@ app.use("/uploads", express.static("uploads"));
 app.use(morgan("dev")); // Log requests to the console
 
 // MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB connected"))
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected Successfully!"))
   .catch((err) => {
-    console.error("MongoDB connection error:", err);
+    console.error("❌ MongoDB Connection Error:", err);
     process.exit(1); // Exit the process with an error code
   });
 
-// ✅ Add missing user routes
+// API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes); // ✅ Fix: Add user routes
+app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 
 // Root Route
 app.get("/", (req, res) => {
-  res.json({ message: "Server is running and MongoDB is connected!" });
+  res.json({ message: "✅ Server is running and MongoDB is connected!" });
 });
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error("Error:", err.stack);
-  if (err.name === "ValidationError") {
-    res.status(400).json({ message: "Validation Error", errors: err.errors });
-  } else if (err.name === "UnauthorizedError") {
-    res.status(401).json({ message: "Unauthorized" });
-  } else {
-    res.status(500).json({ message: "Internal Server Error", error: err.message });
-  }
+  res.status(err.status || 500).json({ 
+    message: err.message || "Internal Server Error", 
+    error: process.env.NODE_ENV === "development" ? err : {} 
+  });
 });
 
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

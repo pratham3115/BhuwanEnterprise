@@ -8,7 +8,7 @@ import About from "./customer/components/aboutus";
 import CheckoutPage from "./customer/components/CheckoutPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import AdminPanel from "./customer/components/admin-panel";
+import AdminPanel from "./customer/components/AdminPanel";
 import Orders from "./pages/Order";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
