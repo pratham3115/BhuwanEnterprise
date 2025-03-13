@@ -271,7 +271,7 @@ const Home = () => {
                   type="submit"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full bg-[#234F1E] text-white py-2 rounded-lg hover:bg-[#1a3b16] transition duration-300"
+                  className="w-full bg-[#0000ff] text-white py-2 rounded-lg hover:bg-[#1a3b16] transition duration-300"
                 >
                   Send Message
                 </motion.button>
@@ -387,7 +387,7 @@ const Home = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={scrollToTop}
-          className="fixed bottom-5 right-5 bg-[#234F1E] text-white p-2 rounded-full shadow-lg hover:bg-[#1a3b16] transition duration-300"
+          className="fixed bottom-5 right-5 bg-[#000000] text-white p-2 rounded-full shadow-lg hover:bg-[#0000ff] transition duration-300"
         >
           <FaArrowUp size={16} />
         </motion.button>

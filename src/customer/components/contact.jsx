@@ -179,7 +179,7 @@ const Contact = () => {
               </div>
               <button
                 type="submit"
-                className={`w-full bg-[#234F1E] text-white py-3 rounded-lg hover:bg-[#1a3b16] transition duration-300 ${
+                className={`w-full bg-[#0000ff] text-white py-3 rounded-lg hover:bg-[#000000] transition duration-300 ${
                   isSubmitting ? "opacity-50 cursor-wait" : ""
                 }`}
                 disabled={isSubmitting}
