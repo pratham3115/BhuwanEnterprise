@@ -5,7 +5,7 @@ import ProductModal from "./ProductModal";
 import SearchBar from "./SearchBar"; // Import the SearchBar component
 import "../styles/product-page.css";
 import { Link, useNavigate } from 'react-router-dom';
-import API_BASE_URL from "../config";
+import API_BASE_URL from "../../api";
 
 export default function ProductPage({ cart, setCart }) {
   const [categories, setCategories] = useState([]);
