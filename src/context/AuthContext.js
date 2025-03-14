@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:5000/api/auth/me", {
+        .get("https://bhuwanenterprise.onrender.com/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
 
   const login = async (identifier, password) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
+      const response = await axios.post("https://bhuwanenterprise.onrender.com/api/auth/login", {
         identifier, password
       });
       localStorage.setItem("token", response.data.token);
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
 
   const signup = async (name, email, mobile, password) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/signup", {
+      const response = await axios.post("https://bhuwanenterprise.onrender.com/api/auth/signup", {
         name, email, mobile, password
       });
       localStorage.setItem("token", response.data.token);
