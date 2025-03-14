@@ -18,7 +18,7 @@ function Orders() {
           return;
         }
 
-        const { data: user } = await axios.get(`${API_BASE_URL}/users/me`, {
+        const { data: user } = await axios.get(`https://bhuwanenterprise.onrender.com/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

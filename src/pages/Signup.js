@@ -31,7 +31,7 @@ function Signup() {
     }
   
     try {
-      const response = await fetch(`${API_BASE_URL}/signup`, {
+      const response = await fetch(`https://bhuwanenterprise.onrender.com/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, mobile, password }),
