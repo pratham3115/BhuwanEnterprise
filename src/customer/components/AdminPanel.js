@@ -32,7 +32,7 @@ export default function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   const [toast, setToast] = useState(null);
 
-  const ADMIN_CREDENTIALS = { username: "admin", password: "123" };
+  const ADMIN_CREDENTIALS = { username: "BE@admin", password: "md.Y/W(At&!Tq3nr%)~>]px8:E;b#HS=`[w-McD6R^e$@7zV}s" };
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
