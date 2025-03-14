@@ -22,7 +22,7 @@ export default function ProductPage({ cart, setCart }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/categories`)
+    fetch(`${API_BASE_URL}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
         const categoriesWithImages = data.map((category) => ({
@@ -36,7 +36,7 @@ export default function ProductPage({ cart, setCart }) {
   }, []);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/products`)
+    fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
         setAllProducts(data);
@@ -47,7 +47,7 @@ export default function ProductPage({ cart, setCart }) {
 
   useEffect(() => {
     if (selectedCategory) {
-      fetch(`${API_BASE_URL}/products?category=${selectedCategory._id}`)
+      fetch(`${API_BASE_URL}/api/products?category=${selectedCategory._id}`)
         .then((res) => res.json())
         .then((data) => {
           setProducts(data);
