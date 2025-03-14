@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Button, Input, Label, Card, CardHeader, CardContent, CardTitle } from "./UtilityComponents";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.API_BASE_URL;
 
 const AdminPanelCategories = ({ categories, setCategories, showToast, setLoading, loading, searchTerm }) => {
   const [categoryFormData, setCategoryFormData] = useState({ name: "", image: "", imageFile: null });

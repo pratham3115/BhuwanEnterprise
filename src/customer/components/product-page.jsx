@@ -6,6 +6,7 @@ import SearchBar from "./SearchBar"; // Import the SearchBar component
 import "../styles/product-page.css";
 import { Link, useNavigate } from 'react-router-dom';
 import API_BASE_URL from "../../api";
+require("dotenv").config();
 
 export default function ProductPage({ cart, setCart }) {
   const [categories, setCategories] = useState([]);
@@ -47,7 +48,7 @@ export default function ProductPage({ cart, setCart }) {
 
   useEffect(() => {
     if (selectedCategory) {
-      fetch(`${API_BASE_URL}/api/products?category=${selectedCategory._id}`)
+      fetch(`${API_BASE_URL}/products?category=${selectedCategory._id}`)
         .then((res) => res.json())
         .then((data) => {
           setProducts(data);
