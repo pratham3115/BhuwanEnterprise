@@ -1,86 +1,72 @@
 const express = require("express");
-const Category = require("../models/category");
-const multer = require("multer");
-const path = require("path");
 const mongoose = require("mongoose");
-
+const Category = require("../models/category");
 const router = express.Router();
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+require("dotenv").config();
 
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Multer with Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "category_images",
+    format: async (req, file) => "png",
+    public_id: (req, file) => `${Date.now()}-${file.originalname}`,
   },
 });
 
-const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null, true);
-  },
-});
+const upload = multer({ storage });
 
-// Fetch all categories
-router.get("/", async (req, res) => {
+// ✅ Add a New Category
+router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const categories = await Category.find();
-    res.json(categories);
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
+    }
+
+    const categoryData = {
+      name: req.body.name,
+      image: req.file.path,
+    };
+
+    const category = new Category(categoryData);
+    const savedCategory = await category.save();
+    res.status(201).json(savedCategory);
   } catch (err) {
-    console.error(err);
+    console.error("Error adding category:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-// Create a new category
-router.post("/", upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file && !req.body.imageUrl) {
-      return res.status(400).json({ message: "Image is required" });
-    }
-
-    const category = new Category({
-      name: req.body.name,
-      image: req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl,
-    });
-
-    const newCategory = await category.save();
-    res.status(201).json(newCategory);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: err.message });
-  }
-});
-
+// ✅ Update a Category
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
-    console.log("Request File:", req.file);
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid category ID format" });
     }
 
-    const updateData = { name: req.body.name };
+    const updateData = {
+      name: req.body.name,
+    };
 
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
-    } else if (req.body.imageUrl) {
-      updateData.image = req.body.imageUrl;
+      updateData.image = req.file.path;
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(id, updateData, { new: true });
-
     if (!updatedCategory) {
       return res.status(404).json({ message: "Category not found" });
     }
-
     res.json(updatedCategory);
   } catch (err) {
     console.error("Error updating category:", err);
@@ -88,17 +74,33 @@ router.put("/:id", upload.single("image"), async (req, res) => {
   }
 });
 
+// ✅ Get Categories
+router.get("/", async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
-// Delete a category
+// ✅ Delete a Category
 router.delete("/:id", async (req, res) => {
   try {
-    const category = await Category.findByIdAndDelete(req.params.id);
-    if (!category) {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid category ID format" });
+    }
+
+    const deletedCategory = await Category.findByIdAndDelete(id);
+    if (!deletedCategory) {
       return res.status(404).json({ message: "Category not found" });
     }
-    res.json({ message: "Category deleted successfully" });
+
+    res.json({ message: "Category deleted successfully", deletedCategory });
   } catch (err) {
-    console.error(err);
+    console.error("Error deleting category:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

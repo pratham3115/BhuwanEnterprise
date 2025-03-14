@@ -1,6 +1,8 @@
-import React, { useState, } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Button, Input, Label, Card, CardHeader, CardContent, CardTitle } from "./UtilityComponents";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const AdminPanelCategories = ({ categories, setCategories, showToast, setLoading, loading, searchTerm }) => {
   const [categoryFormData, setCategoryFormData] = useState({ name: "", image: "", imageFile: null });
@@ -26,7 +28,7 @@ const AdminPanelCategories = ({ categories, setCategories, showToast, setLoading
         } else if (categoryFormData.image) {
           formData.append("imageUrl", categoryFormData.image);
         }
-        const response = await axios.post("http://localhost:5000/api/categories", formData, {
+        const response = await axios.post(`${API_BASE_URL}/api/categories`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setCategories([...categories, response.data]);
@@ -59,7 +61,7 @@ const AdminPanelCategories = ({ categories, setCategories, showToast, setLoading
         } else if (categoryFormData.image) {
           formData.append("imageUrl", categoryFormData.image);
         }
-        const response = await axios.put(`http://localhost:5000/api/categories/${editingCategory._id}`, formData, {
+        const response = await axios.put(`${API_BASE_URL}/api/categories/${editingCategory._id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setCategories(categories.map((category) => (category._id === editingCategory._id ? response.data : category)));
@@ -81,7 +83,7 @@ const AdminPanelCategories = ({ categories, setCategories, showToast, setLoading
     if (window.confirm("Are you sure you want to delete this category?")) {
       setLoading(true);
       try {
-        await axios.delete(`http://localhost:5000/api/categories/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/categories/${id}`);
         setCategories(categories.filter((category) => category._id !== id));
         showToast("Category deleted successfully!");
       } catch (err) {

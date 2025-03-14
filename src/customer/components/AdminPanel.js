@@ -19,6 +19,8 @@ import {
 } from "./UtilityComponents";
 import "./admin-panel.css";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginData, setLoginData] = useState({ username: "", password: "" });
@@ -38,7 +40,7 @@ export default function AdminPanel() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/products");
+      const response = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(response.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -48,7 +50,7 @@ export default function AdminPanel() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/categories");
+      const response = await axios.get(`${API_BASE_URL}/api/categories`);
       setCategories(response.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -58,7 +60,7 @@ export default function AdminPanel() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/orders/all");
+      const response = await axios.get(`${API_BASE_URL}/api/orders/all`);
       setOrders(response.data || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -73,7 +75,7 @@ export default function AdminPanel() {
       fetchOrders();
     }
   }, [isAuthenticated, fetchProducts, fetchCategories, fetchOrders]);
-
+  
   const handleLoginChange = (e) => {
     const { name, value } = e.target;
     setLoginData({ ...loginData, [name]: value });

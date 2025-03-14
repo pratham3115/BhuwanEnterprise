@@ -15,11 +15,17 @@ dotenv.config();
 
 const app = express();
 
-// CORS Configuration
+// CORS Configuration for Render Backend & Vercel Frontend
+const allowedOrigins = [
+  "http://localhost:3000",  // Local Dev Frontend
+  "https://bhuwanenterprise.vercel.app" // Replace with your actual deployed frontend URL
+];
+
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: allowedOrigins,
   methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type,Authorization"
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true
 }));
 
 // Middleware
@@ -29,7 +35,10 @@ app.use("/uploads", express.static("uploads"));
 app.use(morgan("dev")); // Log requests to the console
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => console.log("✅ MongoDB Connected Successfully!"))
   .catch((err) => {
     console.error("❌ MongoDB Connection Error:", err);

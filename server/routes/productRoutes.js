@@ -1,50 +1,51 @@
 const express = require("express");
-const multer = require("multer");
 const mongoose = require("mongoose");
 const Product = require("../models/product");
 const router = express.Router();
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// Configure Multer for Image Uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Define upload directory
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+dotenv.config();
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Multer with Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "product_images",
+    format: async (req, file) => "png", // Convert all images to PNG
+    public_id: (req, file) => `${Date.now()}-${file.originalname}`,
   },
 });
 
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null, true);
-  },
-  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
-});
+const upload = multer({ storage });
 
-// ✅ **Add a New Product** (Fixed Category Validation)
+// ✅ Add a New Product
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    if (!req.file && !req.body.imageUrl) {
-      return res.status(400).json({ message: "Image is required (file or URL)" });
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
     }
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl;
-
-    // ✅ Category Validation
+    const imageUrl = req.file.path;
+    
     if (!req.body.category || !mongoose.Types.ObjectId.isValid(req.body.category)) {
       return res.status(400).json({ message: "Invalid category ID format" });
     }
 
     const productData = {
       name: req.body.name,
-      price: Number.parseFloat(req.body.price),
+      price: Number(req.body.price),
       description: req.body.description,
-      inStock: req.body.inStock === "true" || req.body.inStock === true, // Ensure it's boolean
-      category: new mongoose.Types.ObjectId(req.body.category), // Ensure ObjectId format
+      inStock: req.body.inStock === "true" || req.body.inStock === true,
+      category: new mongoose.Types.ObjectId(req.body.category),
       image: imageUrl,
     };
 
@@ -57,11 +58,10 @@ router.post("/", upload.single("image"), async (req, res) => {
   }
 });
 
-// Update a Product
+// ✅ Update a Product
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid product ID format" });
     }
@@ -75,19 +75,13 @@ router.put("/:id", upload.single("image"), async (req, res) => {
     };
 
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
-    } else if (req.body.imageUrl) {
-      updateData.image = req.body.imageUrl;
+      updateData.image = req.file.path;
     }
 
-    console.log("Update data:", updateData); // Log the update data
-
     const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
-
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
-
     res.json(updatedProduct);
   } catch (err) {
     console.error("Error updating product:", err);
@@ -95,11 +89,10 @@ router.put("/:id", upload.single("image"), async (req, res) => {
   }
 });
 
-// Get Products (With Optional Category Filtering)
+// ✅ Get Products
 router.get("/", async (req, res) => {
   try {
     let query = {};
-
     if (req.query.category) {
       if (!mongoose.Types.ObjectId.isValid(req.query.category)) {
         return res.status(400).json({ message: "Invalid category ID format" });
@@ -115,12 +108,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ **Delete a Product**
+// ✅ Delete a Product
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid product ID format" });
     }
