@@ -34,19 +34,22 @@ const AdminPanelOrders = () => {
 
 
       // Fetch orders based on user role
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+     const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      setOrders(response.data.orders || []);
-      setFilteredOrders(response.data.orders || []);
-      setTotalPages(response.data.totalPages);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage]);
+    console.log("Fetched orders:", response.data); // Log the response data
+
+    setOrders(response.data.orders || []);
+    setFilteredOrders(response.data.orders || []);
+    setTotalPages(response.data.totalPages);
+  } catch (err) {
+    console.error("Error fetching orders:", err); // Log the error
+    setError(err.response?.data?.message || "Failed to fetch orders");
+  } finally {
+    setLoading(false);
+  }
+}, [currentPage]);
 
   useEffect(() => {
     fetchOrders();
