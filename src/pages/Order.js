@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 
 function Orders() {
-  const [orders, setOrders] = useState([]); // Ensuring it's initialized as an array
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -17,26 +18,23 @@ function Orders() {
           return;
         }
 
-        // Fetch user details to check admin role
-        const userResponse = await axios.get("http://localhost:5000/api/users/me", {
+        const { data: user } = await axios.get(`${API_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setIsAdmin(userResponse.data.isAdmin);
+        setIsAdmin(user.isAdmin);
 
-        // Use the correct API endpoint based on role
-        const url = userResponse.data.isAdmin
-          ? "http://localhost:5000/api/orders/all" // Admins see all orders
-          : "http://localhost:5000/api/orders/myorders"; // Customers see only their orders
+        const url = user.isAdmin
+          ? `${API_BASE_URL}/orders/all`
+          : `${API_BASE_URL}/orders/myorders`;
 
-        const response = await axios.get(url, {
+        const { data } = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("API Response:", response.data); // Debugging
-        setOrders(response.data.orders || []); // Ensure orders is always an array
+        setOrders(data.orders || []);
       } catch (err) {
-        setError(err.response?.data?.message || "Failed to fetch orders");
+        setError(err.response?.data?.message || err.message || "Failed to fetch orders");
       } finally {
         setLoading(false);
       }
@@ -52,41 +50,43 @@ function Orders() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">{isAdmin ? "All Orders" : "My Orders"}</h1>
 
-      {Array.isArray(orders) && orders.length > 0 ? ( // Ensure orders is an array before mapping
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 p-2">Order ID</th>
-              {isAdmin && <th className="border border-gray-300 p-2">Customer Name</th>}
-              <th className="border border-gray-300 p-2">Items</th>
-              <th className="border border-gray-300 p-2">Total</th>
-              <th className="border border-gray-300 p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order._id} className="border border-gray-300">
-                <td className="p-2">{order._id}</td>
-                {isAdmin && <td className="p-2">{order.customer?.name || "N/A"}</td>}
-                <td className="p-2">
-                  <ul className="list-disc pl-4">
-                    {Array.isArray(order.items) && order.items.length > 0 ? (
-                      order.items.map((item) => (
-                        <li key={item.productId}>
-                          {item.productName} (x{item.quantity})
-                        </li>
-                      ))
-                    ) : (
-                      <li>No items</li>
-                    )}
-                  </ul>
-                </td>
-                <td className="p-2">₹{order.totalAmount.toFixed(2)}</td>
-                <td className="p-2">{order.status || "Pending"}</td>
+      {orders.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2">Order ID</th>
+                {isAdmin && <th className="border border-gray-300 p-2">Customer</th>}
+                <th className="border border-gray-300 p-2">Items</th>
+                <th className="border border-gray-300 p-2">Total</th>
+                <th className="border border-gray-300 p-2">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order._id} className="border border-gray-300">
+                  <td className="p-2">{order._id}</td>
+                  {isAdmin && <td className="p-2">{order.customer?.name || "N/A"}</td>}
+                  <td className="p-2">
+                    <ul className="list-disc pl-4">
+                      {order.items?.length > 0 ? (
+                        order.items.map((item) => (
+                          <li key={item.productId}>
+                            {item.productName} (x{item.quantity})
+                          </li>
+                        ))
+                      ) : (
+                        <li>No items</li>
+                      )}
+                    </ul>
+                  </td>
+                  <td className="p-2">₹{order.totalAmount?.toFixed(2) || "0.00"}</td>
+                  <td className="p-2">{order.status || "Pending"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p>No orders found.</p>
       )}

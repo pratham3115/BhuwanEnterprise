@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../api";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -11,27 +12,47 @@ function Signup() {
   const navigate = useNavigate();
   const { signup } = useAuth();
 
+  const validatePassword = (password) => {
+    return /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-
-    // Validate mobile number length
+  
     if (!/^\d{10}$/.test(mobile)) {
       setError("Mobile number must be exactly 10 digits.");
       return;
     }
-
+  
+    if (!validatePassword(password)) {
+      setError("Password must be at least 8 characters, include an uppercase letter, a number, and a special character.");
+      return;
+    }
+  
     try {
-      await signup(name, email, mobile, password);
-      navigate("/"); // Redirect to home after successful signup
+      const response = await fetch(`${API_BASE_URL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, mobile, password }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed. Please try again.");
+      }
+  
+      navigate("/"); // Redirect on success
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed");
+      setError(err.message);
     }
   };
+  
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
         <h2 className="text-2xl font-semibold text-center mb-4">Sign Up</h2>
         {error && <p className="text-red-500 text-center">{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -63,8 +84,7 @@ function Signup() {
               type="text"
               value={mobile}
               onChange={(e) => {
-                // Allow only numbers and limit to 10 digits
-                if (e.target.value === "" || /^\d{0,10}$/.test(e.target.value)) {
+                if (/^\d{0,10}$/.test(e.target.value)) {
                   setMobile(e.target.value);
                 }
               }}
@@ -83,6 +103,9 @@ function Signup() {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
               placeholder="Enter your password"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Password must be 8+ characters, include an uppercase letter, a number, and a special character.
+            </p>
           </div>
           <button
             type="submit"
@@ -92,7 +115,6 @@ function Signup() {
           </button>
         </form>
 
-        {/* Login Link */}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
