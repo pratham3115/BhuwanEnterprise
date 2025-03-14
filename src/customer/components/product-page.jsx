@@ -7,7 +7,6 @@ import "../styles/product-page.css";
 import { Link, useNavigate } from 'react-router-dom';
 import API_BASE_URL from "../../api";
 
-
 export default function ProductPage({ cart, setCart }) {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -48,7 +47,7 @@ export default function ProductPage({ cart, setCart }) {
 
   useEffect(() => {
     if (selectedCategory) {
-      fetch(`${API_BASE_URL}/products?category=${selectedCategory._id}`)
+      fetch(`${API_BASE_URL}/api/products?category=${selectedCategory._id}`)
         .then((res) => res.json())
         .then((data) => {
           setProducts(data);
@@ -143,9 +142,9 @@ export default function ProductPage({ cart, setCart }) {
 
   const renderProductGrid = () => {
     return filteredProducts.map((product) => {
-      const imageUrl = product.image.startsWith("http")
-        ? product.image
-        : `http://localhost:5000${product.image}`;
+      const imageUrl = product.image
+        ? (product.image.startsWith("http") ? product.image : `${API_BASE_URL}${product.image}`)
+        : "/placeholder.png";
 
       return (
         <div
@@ -156,7 +155,7 @@ export default function ProductPage({ cart, setCart }) {
           <div className="product-card">
             <div className="product-image-container">
               <img
-                src={imageUrl || "/placeholder.png"}
+                src={imageUrl}
                 alt={product.name}
                 className="product-image"
                 onError={(e) => {
@@ -229,7 +228,11 @@ export default function ProductPage({ cart, setCart }) {
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             <button onClick={() => setShowCart(true)} className="cart-button" aria-label="Open Cart">
               <ShoppingCart className="cart-icon" aria-hidden="true" />
-              {cart.size > 0 && <span className="cart-count" aria-label="Cart Items">{cart.size}</span>}
+              {Array.from(cart.values()).reduce((sum, item) => sum + item.quantity, 0) > 0 && (
+                <span className="cart-count" aria-label="Cart Items">
+                  {Array.from(cart.values()).reduce((sum, item) => sum + item.quantity, 0)}
+                </span>
+              )}
             </button>
           </div>
         </div>
