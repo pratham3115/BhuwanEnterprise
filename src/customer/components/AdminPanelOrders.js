@@ -30,9 +30,8 @@ const AdminPanelOrders = () => {
 
       setIsAdmin(userResponse.data.isAdmin);
 
-      const url = userResponse.data.isAdmin
-        ? `https://bhuwanenterprise.onrender.com/api/orders/all?page=${currentPage}&limit=10`
-        : `https://bhuwanenterprise.onrender.com/api/orders/myorders?page=${currentPage}&limit=10`;
+     const url = `https://bhuwanenterprise.onrender.com/api/orders/all?page=${currentPage}&limit=10`;
+
 
       // Fetch orders based on user role
       const response = await axios.get(url, {
