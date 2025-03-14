@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const Product = require("../models/product");
@@ -6,7 +8,7 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-dotenv.config();
+
 
 // Configure Cloudinary
 cloudinary.config({
