@@ -40,7 +40,7 @@ export default function AdminPanel() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/products`);
+      const response = await axios.get(`https://bhuwanenterprise.onrender.com/api/products`);
       setProducts(response.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -50,7 +50,7 @@ export default function AdminPanel() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/categories`);
+      const response = await axios.get(`https://bhuwanenterprise.onrender.com/api/categories`);
       setCategories(response.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -75,7 +75,7 @@ export default function AdminPanel() {
       fetchOrders();
     }
   }, [isAuthenticated, fetchProducts, fetchCategories, fetchOrders]);
-  
+
   const handleLoginChange = (e) => {
     const { name, value } = e.target;
     setLoginData({ ...loginData, [name]: value });

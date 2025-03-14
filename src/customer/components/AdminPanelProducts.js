@@ -33,7 +33,7 @@ const AdminPanelProducts = ({ products, setProducts, categories, showToast, setL
       } else {
         throw new Error("Image is required (file or URL)");
       }
-      const response = await axios.post("http://localhost:5000/api/products", productData, {
+      const response = await axios.post("https://bhuwanenterprise.onrender.com/api/products", productData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setProducts([...products, response.data]);
@@ -67,7 +67,7 @@ const AdminPanelProducts = ({ products, setProducts, categories, showToast, setL
         } else if (typeof formData.image === "string" && formData.image.trim() !== "") {
           productData.append("imageUrl", formData.image);
         }
-        const response = await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, productData, {
+        const response = await axios.put(`https://bhuwanenterprise.onrender.com/api/products/${editingProduct._id}`, productData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setProducts(products.map((product) => (product._id === editingProduct._id ? response.data : product)));
@@ -89,7 +89,7 @@ const AdminPanelProducts = ({ products, setProducts, categories, showToast, setL
     if (window.confirm("Are you sure you want to delete this product?")) {
       setLoading(true);
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await axios.delete(`https://bhuwanenterprise.onrender.com/api/products/${id}`);
         setProducts(products.filter((product) => product._id !== id));
         showToast("Product deleted successfully!");
       } catch (err) {
@@ -104,7 +104,7 @@ const AdminPanelProducts = ({ products, setProducts, categories, showToast, setL
   const handleToggleStock = async (id, currentStatus) => {
     setLoading(true);
     try {
-      const response = await axios.patch(`http://localhost:5000/api/products/${id}`, { inStock: !currentStatus });
+      const response = await axios.patch(`https://bhuwanenterprise.onrender.com/api/products/${id}`, { inStock: !currentStatus });
       setProducts(products.map((product) => (product._id === id ? { ...product, inStock: response.data.inStock } : product)));
       showToast(`Product ${response.data.inStock ? "put in stock" : "put out of stock"} successfully!`);
     } catch (err) {

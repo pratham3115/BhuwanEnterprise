@@ -24,15 +24,15 @@ const AdminPanelOrders = () => {
       }
 
       // Fetch user info to check admin status
-      const userResponse = await axios.get("http://localhost:5000/api/users/me", {
+      const userResponse = await axios.get("https://bhuwanenterprise.onrender.com/api/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       setIsAdmin(userResponse.data.isAdmin);
 
       const url = userResponse.data.isAdmin
-        ? `http://localhost:5000/api/orders/all?page=${currentPage}&limit=10`
-        : `http://localhost:5000/api/orders/myorders?page=${currentPage}&limit=10`;
+        ? `https://bhuwanenterprise.onrender.com/api/orders/all?page=${currentPage}&limit=10`
+        : `https://bhuwanenterprise.onrender.com/api/orders/myorders?page=${currentPage}&limit=10`;
 
       // Fetch orders based on user role
       const response = await axios.get(url, {
