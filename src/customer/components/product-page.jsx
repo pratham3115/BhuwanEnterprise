@@ -22,45 +22,98 @@ export default function ProductPage({ cart, setCart }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/categories`)
-      .then((res) => res.json())
+    fetch("https://bhuwanenterprise.onrender.com/api/categories", {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+    })
+      .then(async (res) => {
+        const text = await res.text();
+        console.log("Raw Category Response:", text);
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          throw new Error("Invalid JSON in category response");
+        }
+      })
       .then((data) => {
+        console.log("Fetched Categories:", data);
+        if (!Array.isArray(data) || data.length === 0) {
+          console.error("No categories found or invalid response!");
+          return;
+        }
         const categoriesWithImages = data.map((category) => ({
           ...category,
           image: category.image || "/placeholder.svg",
         }));
         setCategories(categoriesWithImages);
-        if (categoriesWithImages.length > 0) setSelectedCategory(categoriesWithImages[0]);
+        setSelectedCategory(categoriesWithImages[0]); // Set first category
       })
       .catch((error) => console.error("Error fetching categories:", error));
   }, []);
-
+  
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products`)
-      .then((res) => res.json())
+    fetch("https://bhuwanenterprise.onrender.com/api/products", {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+    })
+      .then(async (res) => {
+        const text = await res.text();
+        console.log("Raw Product Response:", text);
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          throw new Error("Invalid JSON in product response");
+        }
+      })
       .then((data) => {
+        console.log("Fetched Products:", data);
+        if (!Array.isArray(data) || data.length === 0) {
+          console.error("No products found or invalid response!");
+          return;
+        }
         setAllProducts(data);
         setFilteredProducts(data);
       })
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
-
+  
   useEffect(() => {
-    if (selectedCategory) {
-      fetch(`${API_BASE_URL}/api/products?category=${selectedCategory._id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setProducts(data);
-          if (!searchTerm) {
-            setFilteredProducts(data);
-          }
-        });
-    }
+    if (!selectedCategory) return;
+    console.log("Fetching products for category:", selectedCategory);
+  
+    fetch(`https://bhuwanenterprise.onrender.com/api/products?category=${selectedCategory._id}`, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+    })
+      .then(async (res) => {
+        const text = await res.text();
+        console.log(`Raw Response for ${selectedCategory.name}:`, text);
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          throw new Error("Invalid JSON in category product response");
+        }
+      })
+      .then((data) => {
+        console.log(`Fetched products for ${selectedCategory.name}:`, data);
+        setProducts(data);
+        if (!searchTerm) setFilteredProducts(data);
+      })
+      .catch((error) => console.error("Error fetching products by category:", error));
   }, [selectedCategory, searchTerm]);
-
+  
   useEffect(() => {
     if (allProducts.length === 0) return;
-
+  
     if (searchTerm === "") {
       setFilteredProducts(products);
       setSearchSuggestions([]);
@@ -69,13 +122,14 @@ export default function ProductPage({ cart, setCart }) {
         keys: ["name", "description", "category.name"],
         threshold: 0.3,
       });
-
+  
       const result = fuse.search(searchTerm);
       const suggestions = result.map((res) => res.item);
       setFilteredProducts(suggestions);
       setSearchSuggestions(suggestions.slice(0, 5));
     }
   }, [searchTerm, allProducts, products]);
+  
 
   const handleAddToCart = (product) => {
     if (!product.inStock) {
