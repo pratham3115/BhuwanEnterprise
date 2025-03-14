@@ -18,15 +18,15 @@ function Orders() {
           return;
         }
 
-        const { data: user } = await axios.get(`https://bhuwanenterprise.onrender.com/users/me`, {
+        const { data: user } = await axios.get(`https://bhuwanenterprise.onrender.com/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         setIsAdmin(user.isAdmin);
 
         const url = user.isAdmin
-          ? `https://bhuwanenterprise.onrender.com/orders/all`
-          : `https://bhuwanenterprise.onrender.com/orders/myorders`;
+          ? `https://bhuwanenterprise.onrender.com/api/orders/all`
+          : `https://bhuwanenterprise.onrender.com/api/orders/myorders`;
 
         const { data } = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
