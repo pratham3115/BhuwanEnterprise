@@ -25,8 +25,8 @@ function Orders() {
         setIsAdmin(user.isAdmin);
 
         const url = user.isAdmin
-          ? `${API_BASE_URL}/orders/all`
-          : `${API_BASE_URL}/orders/myorders`;
+          ? `https://bhuwanenterprise.onrender.com/orders/all`
+          : `https://bhuwanenterprise.onrender.com/orders/myorders`;
 
         const { data } = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
