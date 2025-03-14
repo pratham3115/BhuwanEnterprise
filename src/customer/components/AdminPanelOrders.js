@@ -27,29 +27,34 @@ const AdminPanelOrders = () => {
       const userResponse = await axios.get("https://bhuwanenterprise.onrender.com/api/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      
+      console.log("User response:", userResponse.data); // Log user response
       setIsAdmin(userResponse.data.isAdmin);
 
-     const url = `https://bhuwanenterprise.onrender.com/api/orders/all?page=${currentPage}&limit=10`;
+      const url = `https://bhuwanenterprise.onrender.com/api/orders/all?page=${currentPage}&limit=10`;
 
 
       // Fetch orders based on user role
-     const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    console.log("Fetched orders:", response.data); // Log the response data
-
-    setOrders(response.data.orders || []);
-    setFilteredOrders(response.data.orders || []);
-    setTotalPages(response.data.totalPages);
-  } catch (err) {
-    console.error("Error fetching orders:", err); // Log the error
-    setError(err.response?.data?.message || "Failed to fetch orders");
-  } finally {
-    setLoading(false);
-  }
-}, [currentPage]);
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      console.log("Fetched orders:", response.data); // Log the response data
+  
+      if (response.data.orders) {
+        setOrders(response.data.orders);
+        setFilteredOrders(response.data.orders);
+        setTotalPages(response.data.totalPages);
+      } else {
+        throw new Error("Orders data is missing in the response");
+      }
+    } catch (err) {
+      console.error("Error fetching orders:", err); // Log the error
+      setError(err.response?.data?.message || err.message || "Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     fetchOrders();
