@@ -58,9 +58,9 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
         return;
       }
 
-      console.log("Sending request to:", `${BASE_URL}/api/orders`);
+      console.log("Sending request to:", `https://bhuwanenterprise.onrender.com/api/orders`);
 
-      const response = await fetch(`${BASE_URL}/api/orders`, {
+      const response = await fetch(`https://bhuwanenterprise.onrender.com/api/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
