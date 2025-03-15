@@ -408,15 +408,24 @@ body {
     width: 95%;
   }
 
-  .header-actions {
-    flex-direction: column;
+   .header-actions {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .search-wrapper {
-    width: 80%;
-     padding: 3px;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
   }
+
+  .cart-button {
+    margin-left: 10px; /* Adds spacing between search and cart */
+    flex-shrink: 0; /* Prevents shrinking */
+  }
+}
 
   .category-list {
     flex-direction: column;
