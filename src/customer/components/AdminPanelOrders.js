@@ -148,7 +148,7 @@ const OrderRow = ({ order, isAdmin }) => (
               />
             )}
             <span>
-              {item.productId?.name || "Unknown Product"} - {item.quantity} x $
+              {item.productId?.name || "Unknown Product"} - {item.quantity} x ₹
               {item.price.toFixed(2)}
             </span>
           </li>
