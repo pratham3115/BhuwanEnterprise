@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CheckoutPage.css";
 import PropTypes from "prop-types";
 import { Plus, Minus, Trash } from "lucide-react";
@@ -15,6 +16,15 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login"); // Redirect to login page if not authenticated
+    }
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -26,13 +36,11 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
 
   const isFormIncomplete = Object.values(userInfo).some((value) => value.trim() === "");
 
-  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (cart.size === 0 || Array.from(cart.values()).length === 0) {
+    if (cart.size === 0) {
       alert("Your cart is empty. Please add items before placing an order.");
       setIsLoading(false);
       return;
@@ -44,6 +52,14 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
       return;
     }
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in to place an order.");
+      setIsLoading(false);
+      navigate("/login");
+      return;
+    }
+
     const orderData = {
       customer: userInfo,
       items: Array.from(cart.values()),
@@ -51,16 +67,7 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
     };
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please log in to place an order.");
-        setIsLoading(false);
-        return;
-      }
-
-      console.log("Sending request to:", `https://bhuwanenterprise.onrender.com/api/orders`);
-
-      const response = await fetch(`https://bhuwanenterprise.onrender.com/api/orders`, {
+      const response = await fetch("https://bhuwanenterprise.onrender.com/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,22 +76,14 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
         body: JSON.stringify(orderData),
       });
 
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const responseData = await response.json();
-        if (response.ok) {
-          console.log("Order placed successfully!", responseData);
-          alert("Order placed successfully!");
-        } else {
-          console.error("Failed to place order:", responseData.message);
-          alert(`Failed to place order: ${responseData.message}`);
-        }
+      const responseData = await response.json();
+      if (response.ok) {
+        alert("Order placed successfully!");
+        navigate("/order-success"); // Redirect to success page
       } else {
-        console.error("Unexpected response format:", response);
-        alert("Failed to place order. Please try again.");
+        alert(`Failed to place order: ${responseData.message}`);
       }
     } catch (error) {
-      console.error("Error placing order:", error);
       alert("Failed to place order. Please try again.");
     } finally {
       setIsLoading(false);
@@ -105,15 +104,15 @@ export default function CheckoutPage({ cart, calculateTotal, handleUpdateQuantit
                   <h4>{item.name}</h4>
                   <p>₹{item.price.toFixed(2)} x {item.quantity}</p>
                   <div className="quantity-controls">
-                    <button onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)} aria-label="Decrease Quantity">
-                      <Minus className="quantity-icon" aria-hidden="true" />
+                    <button onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)}>
+                      <Minus className="quantity-icon" />
                     </button>
-                    <span aria-label="Quantity">{item.quantity}</span>
-                    <button onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)} aria-label="Increase Quantity">
-                      <Plus className="quantity-icon" aria-hidden="true" />
+                    <span>{item.quantity}</span>
+                    <button onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}>
+                      <Plus className="quantity-icon" />
                     </button>
-                    <button onClick={() => handleRemoveFromCart(item._id)} className="remove-button" aria-label="Remove from Cart">
-                      <Trash className="remove-icon" aria-hidden="true" />
+                    <button onClick={() => handleRemoveFromCart(item._id)} className="remove-button">
+                      <Trash className="remove-icon" />
                     </button>
                   </div>
                 </div>
@@ -154,11 +153,4 @@ CheckoutPage.propTypes = {
   calculateTotal: PropTypes.func.isRequired,
   handleUpdateQuantity: PropTypes.func.isRequired,
   handleRemoveFromCart: PropTypes.func.isRequired,
-};
-
-CheckoutPage.defaultProps = {
-  cart: new Map(),
-  calculateTotal: () => 0,
-  handleUpdateQuantity: () => {},
-  handleRemoveFromCart: () => {},
 };
