@@ -15,7 +15,7 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-  Toast,
+  Toast
 } from "./UtilityComponents";
 import "./admin-panel.css";
 
@@ -31,7 +31,6 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("categories");
   const [searchTerm, setSearchTerm] = useState("");
   const [toast, setToast] = useState(null);
-  const [lastActivity, setLastActivity] = useState(Date.now());
 
   const ADMIN_CREDENTIALS = { username: "BE@admin", password: "md.Y/W(At&!Tq3nr%)~>]px8:E;b#HS=`[w-McD6R^e$@7zV}s" };
 
@@ -41,7 +40,7 @@ export default function AdminPanel() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/products`);
+      const response = await axios.get(`https://bhuwanenterprise.onrender.com/api/products`);
       setProducts(response.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -51,7 +50,7 @@ export default function AdminPanel() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/categories`);
+      const response = await axios.get(`https://bhuwanenterprise.onrender.com/api/categories`);
       setCategories(response.data || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -76,37 +75,6 @@ export default function AdminPanel() {
       fetchOrders();
     }
   }, [isAuthenticated, fetchProducts, fetchCategories, fetchOrders]);
-
-  // Auto-refresh logic
-  useEffect(() => {
-    if (isAuthenticated) {
-      const interval = setInterval(() => {
-        if (Date.now() - lastActivity >= 10000) {
-          fetchProducts();
-          fetchCategories();
-          fetchOrders();
-          console.log("Auto-refreshed data due to inactivity.");
-        }
-      }, 10000);
-
-      return () => clearInterval(interval);
-    }
-  }, [lastActivity, isAuthenticated, fetchProducts, fetchCategories, fetchOrders]);
-
-  // Detect User Activity
-  useEffect(() => {
-    const resetTimer = () => setLastActivity(Date.now());
-
-    window.addEventListener("mousemove", resetTimer);
-    window.addEventListener("keydown", resetTimer);
-    window.addEventListener("click", resetTimer);
-
-    return () => {
-      window.removeEventListener("mousemove", resetTimer);
-      window.removeEventListener("keydown", resetTimer);
-      window.removeEventListener("click", resetTimer);
-    };
-  }, []);
 
   const handleLoginChange = (e) => {
     const { name, value } = e.target;
@@ -208,11 +176,26 @@ export default function AdminPanel() {
           </TabsList>
 
           <TabsContent isActive={activeTab === "categories"}>
-            <AdminPanelCategories categories={categories} setCategories={setCategories} searchTerm={searchTerm} />
+            <AdminPanelCategories
+              categories={categories}
+              setCategories={setCategories}
+              showToast={showToast}
+              setLoading={setLoading}
+              loading={loading}
+              searchTerm={searchTerm}
+            />
           </TabsContent>
 
           <TabsContent isActive={activeTab === "products"}>
-            <AdminPanelProducts products={products} setProducts={setProducts} searchTerm={searchTerm} />
+            <AdminPanelProducts
+              products={products}
+              setProducts={setProducts}
+              categories={categories}
+              showToast={showToast}
+              setLoading={setLoading}
+              loading={loading}
+              searchTerm={searchTerm}
+            />
           </TabsContent>
 
           <TabsContent isActive={activeTab === "orders"}>
