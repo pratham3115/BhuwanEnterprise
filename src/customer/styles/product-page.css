@@ -425,7 +425,7 @@ body {
     margin-left: 10px; /* Adds spacing between search and cart */
     flex-shrink: 0; /* Prevents shrinking */
   }
-}
+
 
   .category-list {
     flex-direction: column;
