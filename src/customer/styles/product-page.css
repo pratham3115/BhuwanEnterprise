@@ -410,6 +410,7 @@ body {
 
   .search-wrapper {
     width: 80%;
+     padding: 3px;
   }
 
   .category-list {
