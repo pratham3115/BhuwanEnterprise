@@ -428,9 +428,29 @@ body {
 
 
   .category-list {
-    flex-direction: column;
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
   }
+
+  .category-item {
+    flex: 1 1 calc(50% - 10px); /* Makes 2 items per row */
+    display: flex;
+    justify-content: center;
+  }
+
+  .category-button {
+    width: 100%;
+    max-width: 150px; /* Limits size */
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .category-button img {
+    width: 80px;
+    height: 80px;
+  }  
 
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
