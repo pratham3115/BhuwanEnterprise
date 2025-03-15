@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -20,9 +20,19 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
 
+  // Disable background scrolling when the menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+    return () => document.body.classList.remove("overflow-hidden");
+  }, [open]);
+
   const handleLogout = () => {
     logout();
-    setOpen(false); // Close mobile menu on logout
+    setOpen(false); // Close menu on logout
   };
 
   return (
@@ -30,7 +40,7 @@ export default function Navbar() {
       <nav className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center justify-start">
+          <div className="flex items-center">
             <Link to="/" className="flex items-center">
               <img src={logo} alt="Bhuwan Enterprise Logo" className="h-10 w-auto" />
               <span className="ml-2 text-xl font-bold text-gray-800">Bhuwan Enterprise</span>
@@ -84,9 +94,9 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile Navigation */}
-      <Dialog open={open} onClose={() => setOpen(false)} className="lg:hidden">
-        <DialogBackdrop className="fixed inset-0 bg-black/25" />
-        <DialogPanel className="fixed inset-y-0 left-0 w-full max-w-xs bg-white p-6 shadow-lg">
+      <Dialog open={open} onClose={() => setOpen(false)} className="lg:hidden fixed inset-0 z-50">
+        <DialogBackdrop className="fixed inset-0 bg-black/50" />
+        <DialogPanel className="fixed inset-y-0 left-0 w-full max-w-xs bg-white p-6 shadow-lg z-50">
           <div className="flex justify-between items-center">
             <Link to="/" className="flex items-center">
               <img src={logo} alt="Bhuwan Enterprise Logo" className="h-8 w-auto" />
@@ -97,19 +107,19 @@ export default function Navbar() {
             </button>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 space-y-4">
             {navigation.categories.map((category) => (
-              <Link key={category.id} to={category.href} className="block text-gray-800 font-medium mb-2">
+              <Link key={category.id} to={category.href} className="block text-gray-800 font-medium py-2" onClick={() => setOpen(false)}>
                 {category.name}
               </Link>
             ))}
             {navigation.pages.map((page) => (
-              <Link key={page.name} to={page.href} className="block text-gray-800 font-medium mb-2">
+              <Link key={page.name} to={page.href} className="block text-gray-800 font-medium py-2" onClick={() => setOpen(false)}>
                 {page.name}
               </Link>
             ))}
             {user && (
-              <Link to="/orders" className="block text-gray-800 font-medium mb-2">
+              <Link to="/orders" className="block text-gray-800 font-medium py-2" onClick={() => setOpen(false)}>
                 My Orders
               </Link>
             )}
@@ -125,7 +135,7 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link to="/login" className="w-full block text-center bg-blue-500 text-white py-2 rounded">
+              <Link to="/login" className="w-full block text-center bg-blue-500 text-white py-2 rounded" onClick={() => setOpen(false)}>
                 Login
               </Link>
             )}
