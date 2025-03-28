@@ -189,7 +189,7 @@ const AdminPanelProducts = ({ products, setProducts, categories, showToast, setL
                     <img src={product.image || "/placeholder.svg"} alt={product.name} className="w-full h-48 object-cover rounded-lg mb-2" />
                     <h4 className="font-semibold">{product.name}</h4>
                     <p className="text-sm text-gray-500">{product.description}</p>
-                    <p className="font-medium">${product.price.toFixed(2)}</p>
+                    <p className="font-medium">₹{product.price.toFixed(2)}</p>
                     <div className="flex items-center justify-between">
                       <Switch id={`productInStock-${product._id}`} checked={product.inStock} onChange={() => handleToggleStock(product._id, product.inStock)} />
                       <Label htmlFor={`productInStock-${product._id}`}>{product.inStock ? "In Stock" : "Out of Stock"}</Label>
