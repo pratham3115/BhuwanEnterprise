@@ -52,7 +52,7 @@
           products.forEach(product => {
             const li = document.createElement('li');
             li.innerHTML = `
-              ${product.name} - $${product.price}
+              ${product.name} - <p class="font-medium">₹${parseFloat(product.price).toFixed(2)}</p>
               <img src="${product.image}" alt="${product.name}" style="max-width: 100px; max-height: 100px;">
             `;
             productList.appendChild(li);
@@ -109,4 +109,3 @@
 
 </body>
 </html>
-
