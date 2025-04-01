@@ -28,12 +28,12 @@ import Product_8 from "../../assets/grip.jpg"
 
 const products = [
   { name: "MANDREL", image: Product_1 },
-  { name: "HELICAL GEAR", image: Product_2 },
+  { name: "DICS", image: Product_2 },
   { name: "CNC TURNED COMPONENTS", image: Product_3 },
   { name: "SPINDLE", image: Product_4 },
-  { name: "RECEIVING GAUGES", image: Product_5 },
+  { name: "PATTERN DICS", image: Product_5 },
   { name: "DRILL JIG", image: Product_6 },
-  { name: "COLLETS", image: Product_7 },
+  { name: "NEDDLES", image: Product_7 },
   { name: "HYDRAULIC FIXTURES", image: Product_8 },
 ]
 
